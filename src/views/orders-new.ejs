@@ -12,22 +12,34 @@
   </div>
 <% } %>
 
+<%
+  const selectedCustomer = customers.find((c) => String(c.id) === String(data?.customer_id));
+  const selectedCustomerName = selectedCustomer ? selectedCustomer.name : '';
+%>
+
 <form
   id="orderForm"
   action="/orders"
   method="post"
   class="card p-3"
+  data-customers="<%- encodeURIComponent(JSON.stringify(customers)) %>"
   data-products="<%- encodeURIComponent(JSON.stringify(products)) %>"
   data-existing-items="<%- encodeURIComponent(JSON.stringify(Array.isArray(data?.items) ? data.items : [])) %>"
 >
-  <div class="mb-3">
-    <label class="form-label">Cliente</label>
-    <select class="form-select" name="customer_id" required>
-      <option value="">Selecione...</option>
-      <% customers.forEach((c) => { %>
-        <option value="<%= c.id %>" <%= String(data?.customer_id) === String(c.id) ? 'selected' : '' %>><%= c.name %></option>
-      <% }) %>
-    </select>
+  <div class="mb-3 position-relative">
+    <label class="form-label" for="customerSearch">Cliente</label>
+    <input
+      id="customerSearch"
+      class="form-control"
+      type="text"
+      autocomplete="off"
+      placeholder="Digite o nome do cliente..."
+      value="<%= selectedCustomerName %>"
+      required
+    />
+    <input id="customerId" type="hidden" name="customer_id" value="<%= data?.customer_id || '' %>" />
+    <div id="customerResults" class="list-group position-absolute w-100 shadow-sm d-none" style="z-index: 20;"></div>
+    <div class="form-text">Digite para filtrar clientes e clique no cliente correto.</div>
   </div>
 
   <div class="mb-3">
