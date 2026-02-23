@@ -1,0 +1,82 @@
+name: CI-CD
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: salesdb
+          POSTGRES_USER: salesuser
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U salesuser -d salesdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        env:
+          APP_NAME: Sales App
+          HOST: 127.0.0.1
+          PORT: 3000
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_NAME: salesdb
+          DB_USER: salesuser
+          DB_PASSWORD: test_password
+          DB_SSL: false
+          RATE_LIMIT_WINDOW_MS: 900000
+          RATE_LIMIT_MAX: 300
+        run: npm test
+
+      - name: Build app image
+        run: docker build -t sales-app:${{ github.sha }} .
+
+      - name: Build db image
+        run: docker build -t sales-db:${{ github.sha }} ./db
+
+      - name: Login to Docker Hub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag and push images
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          docker tag sales-app:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:${{ github.sha }}
+          docker tag sales-db:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:${{ github.sha }}
+          docker tag sales-app:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:latest
+          docker tag sales-db:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:latest
+
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:latest

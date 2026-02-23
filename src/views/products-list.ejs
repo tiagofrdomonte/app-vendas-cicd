@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Produtos</h2>
+  <a class="btn btn-success" href="/products/new">Novo produto</a>
+</div>
+
+<div class="card p-3">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>SKU</th>
+          <th>Nome</th>
+          <th>Preço</th>
+          <th>Criado em</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% products.forEach((p) => { %>
+          <tr>
+            <td><%= p.id %></td>
+            <td><%= p.sku %></td>
+            <td><%= p.name %></td>
+            <td>R$ <%= Number(p.unit_price).toFixed(2) %></td>
+            <td><%= new Date(p.created_at).toLocaleString('pt-BR') %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

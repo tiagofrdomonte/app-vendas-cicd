@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<h2 class="mb-3">Nova Ordem de Venda</h2>
+
+<% if (errors && errors.length) { %>
+  <div class="alert alert-danger">
+    <ul class="mb-0">
+      <% errors.forEach((error) => { %>
+        <li><%= error.msg %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form
+  id="orderForm"
+  action="/orders"
+  method="post"
+  class="card p-3"
+  data-products="<%- encodeURIComponent(JSON.stringify(products)) %>"
+  data-existing-items="<%- encodeURIComponent(JSON.stringify(Array.isArray(data?.items) ? data.items : [])) %>"
+>
+  <div class="mb-3">
+    <label class="form-label">Cliente</label>
+    <select class="form-select" name="customer_id" required>
+      <option value="">Selecione...</option>
+      <% customers.forEach((c) => { %>
+        <option value="<%= c.id %>" <%= String(data?.customer_id) === String(c.id) ? 'selected' : '' %>><%= c.name %></option>
+      <% }) %>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Observações</label>
+    <textarea class="form-control" name="notes" rows="2"><%= data?.notes || '' %></textarea>
+  </div>
+
+  <h5>Itens</h5>
+  <div id="itemsContainer" class="d-flex flex-column gap-2 mb-3"></div>
+
+  <div class="d-flex gap-2 mb-3">
+    <button class="btn btn-outline-secondary" type="button" id="addItemBtn">Adicionar item</button>
+  </div>
+
+  <button class="btn btn-dark" type="submit">Criar ordem</button>
+</form>
+
+<script src="/orders-new.js"></script>
+
+<%- include('partials/footer') %>
