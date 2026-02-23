@@ -70,12 +70,12 @@ jobs:
       - name: Tag and push images
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          docker tag sales-app:${{ github.run_number }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:${{ github.run_number }}
-          docker tag sales-db:${{ github.run_number }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:${{ github.run_number }}
+          docker tag sales-app:${{ github.run_number }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:1.0.${{ github.run_number }}
+          docker tag sales-db:${{ github.run_number }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:1.0.${{ github.run_number }}
           docker tag sales-app:${{ github.run_number }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:latest
           docker tag sales-db:${{ github.run_number }} ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:latest
 
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:${{ github.run_number }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:${{ github.run_number }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:1.0.${{ github.run_number }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:1.0.${{ github.run_number }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-app:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/sales-db:latest
